@@ -1,12 +1,11 @@
+from __future__ import annotations
+
 from typing import Any, Mapping, cast, overload
 
 from google.protobuf.internal import containers
 from google.protobuf import descriptor
 from google.protobuf.message import Message
-from google.protobuf.any import type_name
 from google.protobuf import any_pb2
-
-from jetblack_protobuf_gen.pb import events_pb2
 
 
 class MessageMeta[T: type](type):
@@ -101,7 +100,7 @@ class Serializable[MessageType: Message]:
                     else:
                         setattr(self._instance, field.name, value)
 
-    def __getattribue__(self, name: str) -> Any:
+    def __getattr__(self, name: str) -> Any:
         if not name in self.MESSAGE_FIELDS:
             return super().__getattribute__(name)
         elif name in self._lists:

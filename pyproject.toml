@@ -1,5 +1,5 @@
 [project]
-name = "protobuf-ex1"
+name = "jetblack-protobuf-gen"
 version = "0.1.0"
 description = "Let's go psycho!"
 authors = [{name = "Rob Blackbourn", email = "rob.blackbourn@gmail.com"}]
