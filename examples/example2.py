@@ -1,4 +1,4 @@
-from jetblack_protobuf_gen.events import OrderCreated, TradeExecuted
+from jetblack_protobuf_gen.pb.events import OrderCreated, TradeExecuted
 
 
 def main() -> None:

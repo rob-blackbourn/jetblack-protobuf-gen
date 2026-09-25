@@ -9,7 +9,7 @@ from google.protobuf.internal.containers import RepeatedCompositeFieldContainer
 from google.protobuf.message import Message
 
 
-def to_python_type(field: FieldDescriptorProto) -> str:
+def to_ultimate_python_type(field: FieldDescriptorProto) -> str:
     match field.type:
         case field.TYPE_BOOL:
             return "bool"
@@ -27,20 +27,28 @@ def to_python_type(field: FieldDescriptorProto) -> str:
             raise ValueError(f"Unable to handle: {field.type}")
 
 
+def to_python_type(field: FieldDescriptorProto) -> str:
+    ultimate_type = to_ultimate_python_type(field)
+    if field.label == field.LABEL_REPEATED:
+        ultimate_type = f"list[{ultimate_type}]"
+    return ultimate_type
+
+
 def generate_known_serializables(
-        file_descriptor: FileDescriptorProto,
+        qualname: str,
         nested_types: RepeatedCompositeFieldContainer[DescriptorProto],
         level: int
 ) -> str:
     text = ",\n".join(
-        f"{file_descriptor.name[:-len(".proto")]}_pb2.{descriptor.name}: {descriptor.name}"
+        f"\"{qualname}.{descriptor.name}\": {descriptor.name}"
         for descriptor in nested_types
     )
     return indent(text, " " * level)
 
 
 def generate_from_binary(
-        file_descriptor: FileDescriptorProto,
+        qualname: str,
+        module: str,
         descriptor: DescriptorProto,
         level: int
 ) -> str:
@@ -49,7 +57,7 @@ def generate_from_binary(
 
     text = f"""\
     _KNOWN_SERIALIZABLES: Mapping[str, type[Serializable]] = {{
-        {generate_known_serializables(file_descriptor, descriptor.nested_type, level)}
+        {generate_known_serializables(qualname, descriptor.nested_type, level)}
     }}
 
     @classmethod
@@ -57,7 +65,7 @@ def generate_from_binary(
             cls,
             buf: bytes,
             serializables: Mapping[str, type[Serializable]] | None = None
-    ) -> Serializable[{file_descriptor.name[:-len(".proto")]}_pb2.{descriptor.name}]:
+    ) -> Serializable[{module}]:
         if serializables is None:
             serializables = cls._KNOWN_SERIALIZABLES
         elif any(x not in serializables for x in cls._KNOWN_SERIALIZABLES):
@@ -95,18 +103,20 @@ class Kwargs(TypedDict):
 
 
 def generate_class(
-        file_descriptor: FileDescriptorProto,
+        qualname: str,
+        module: str,
         descriptor: DescriptorProto,
         level: int
 ) -> str:
-    message_type = f"{file_descriptor.name[:-len(".proto")]}_pb2.{descriptor.name}"
+    module = f"{module}.{descriptor.name}"
+    qualname = f"{qualname}.{descriptor.name}"
     text = f"""\
 class {descriptor.name}(
-    Serializable[{message_type}],
+    Serializable[{module}],
     metaclass=MessageMeta,
-    message_type={message_type}
+    message_type={module}
 ):
-{generate_classes(file_descriptor, descriptor.nested_type, 4)}
+{generate_classes(qualname, module, descriptor.nested_type, 4)}
 {generate_instance_types(descriptor.field, 4)}
 
 {generate_kwargs(descriptor.field, 4)}
@@ -114,7 +124,7 @@ class {descriptor.name}(
     @overload
     def __init__(
             self,
-            instance: {message_type},
+            instance: {module},
             serializables: Mapping[str, Serializable]
     ) -> None:
         ...
@@ -129,13 +139,14 @@ class {descriptor.name}(
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
-{generate_from_binary(file_descriptor, descriptor, level)}"""
+{generate_from_binary(qualname, module, descriptor, level)}"""
 
     return indent(text, " " * level)
 
 
 def generate_classes(
-        file_descriptor: FileDescriptorProto,
+        qualname: str,
+        module: str,
         message_types: RepeatedCompositeFieldContainer[DescriptorProto],
         level: int
 ) -> str:
@@ -143,7 +154,7 @@ def generate_classes(
         return ""
 
     text = "\n".join(
-        generate_class(file_descriptor, descriptor, level)
+        generate_class(qualname, module, descriptor, level)
         for descriptor in message_types
     )
     return text
@@ -153,13 +164,15 @@ def generate_classes(
 def generate_file(
         file_descriptor: FileDescriptorProto
 ) -> str:
+    module = f"{file_descriptor.name[:-len(".proto")]}_pb2"
+    qualname = f"{file_descriptor.package}"
 
     return f"""\
 from typing import Mapping, TypedDict, Unpack, overload
 
-from {file_descriptor.package} import {file_descriptor.name[:-len(".proto")]}_pb2
+from {file_descriptor.package} import {module}
 
 from jetblack_protobuf_gen.serializable import Serializable, MessageMeta
 
 
-{generate_classes(file_descriptor, file_descriptor.message_type, 0)}"""
+{generate_classes(qualname, module, file_descriptor.message_type, 0)}"""

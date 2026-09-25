@@ -46,9 +46,9 @@ class TradeExecuted(
     message_type=events_pb2.TradeExecuted
 ):
     class Fill(
-        Serializable[events_pb2.Fill],
+        Serializable[events_pb2.TradeExecuted.Fill],
         metaclass=MessageMeta,
-        message_type=events_pb2.Fill
+        message_type=events_pb2.TradeExecuted.Fill
     ):
 
         fill_id: str
@@ -64,7 +64,7 @@ class TradeExecuted(
         @overload
         def __init__(
                 self,
-                instance: events_pb2.Fill,
+                instance: events_pb2.TradeExecuted.Fill,
                 serializables: Mapping[str, Serializable]
         ) -> None:
             ...
@@ -82,12 +82,12 @@ class TradeExecuted(
 
     trade_id: str
     order_id: str
-    fills: Serializable
+    fills: list[Serializable]
 
     class Kwargs(TypedDict):
         trade_id: str
         order_id: str
-        fills: Serializable
+        fills: list[Serializable]
 
 
     @overload
@@ -109,7 +109,7 @@ class TradeExecuted(
         super().__init__(*args, **kwargs)
 
     _KNOWN_SERIALIZABLES: Mapping[str, type[Serializable]] = {
-        events_pb2.Fill: Fill
+        "jetblack_protobuf_gen.pb.TradeExecuted.Fill": Fill
     }
 
     @classmethod
