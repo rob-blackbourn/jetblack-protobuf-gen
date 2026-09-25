@@ -1,5 +1,4 @@
-from protobuf_ex1.OrderCreated import OrderCreated
-from protobuf_ex1.TradeExecuted import TradeExecuted
+from protobuf_ex1.events import OrderCreated, TradeExecuted
 
 
 def main() -> None:
