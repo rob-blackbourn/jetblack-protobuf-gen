@@ -12,7 +12,12 @@ dependencies = [
 dev = [
     "mypy",
     "types-protobuf",
+    "debugpy",
 ]
+
+[project.scripts]
+protoc-gen-jetpy = "protobuf_ex1.plugin:main"
+
 [build-system]
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
