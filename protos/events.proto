@@ -2,6 +2,12 @@ syntax = "proto3";
 
 package jetblack_protobuf_gen.pb;
 
+enum Side {
+    SIDE_UNSPECIFIED = 0;
+    SIDE_BUY = 1;
+    SIDE_SELL = 2;
+}
+
 message OrderCreated {
     string order_id = 1;
     string symbol = 2;
@@ -11,6 +17,12 @@ message OrderCreated {
 message TradeExecuted {
     string trade_id = 1;
     string order_id = 2;
+
+    enum Counterparty {
+        COUNTERPARTY_UNSPECIFIED = 0;
+        COUNTERPARTY_INTERNAL = 1;
+        COUNTERPARTY_EXTERNAL = 2;
+    }
 
     message Fill {
         string fill_id = 1;

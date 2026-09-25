@@ -24,17 +24,21 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0c\x65vents.proto\x12\x18jetblack_protobuf_gen.pb\"B\n\x0cOrderCreated\x12\x10\n\x08order_id\x18\x01 \x01(\t\x12\x0e\n\x06symbol\x18\x02 \x01(\t\x12\x10\n\x08quantity\x18\x03 \x01(\x05\"\xaa\x01\n\rTradeExecuted\x12\x10\n\x08trade_id\x18\x01 \x01(\t\x12\x10\n\x08order_id\x18\x02 \x01(\t\x12;\n\x05\x66ills\x18\x04 \x03(\x0b\x32,.jetblack_protobuf_gen.pb.TradeExecuted.Fill\x1a\x38\n\x04\x46ill\x12\x0f\n\x07\x66ill_id\x18\x01 \x01(\t\x12\x10\n\x08quantity\x18\x02 \x01(\x05\x12\r\n\x05price\x18\x03 \x01(\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0c\x65vents.proto\x12\x18jetblack_protobuf_gen.pb\"B\n\x0cOrderCreated\x12\x10\n\x08order_id\x18\x01 \x01(\t\x12\x0e\n\x06symbol\x18\x02 \x01(\t\x12\x10\n\x08quantity\x18\x03 \x01(\x05\"\x8e\x02\n\rTradeExecuted\x12\x10\n\x08trade_id\x18\x01 \x01(\t\x12\x10\n\x08order_id\x18\x02 \x01(\t\x12;\n\x05\x66ills\x18\x04 \x03(\x0b\x32,.jetblack_protobuf_gen.pb.TradeExecuted.Fill\x1a\x38\n\x04\x46ill\x12\x0f\n\x07\x66ill_id\x18\x01 \x01(\t\x12\x10\n\x08quantity\x18\x02 \x01(\x05\x12\r\n\x05price\x18\x03 \x01(\x01\"b\n\x0c\x43ounterparty\x12\x1c\n\x18\x43OUNTERPARTY_UNSPECIFIED\x10\x00\x12\x19\n\x15\x43OUNTERPARTY_INTERNAL\x10\x01\x12\x19\n\x15\x43OUNTERPARTY_EXTERNAL\x10\x02*9\n\x04Side\x12\x14\n\x10SIDE_UNSPECIFIED\x10\x00\x12\x0c\n\x08SIDE_BUY\x10\x01\x12\r\n\tSIDE_SELL\x10\x02\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'events_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
+  _globals['_SIDE']._serialized_start=383
+  _globals['_SIDE']._serialized_end=440
   _globals['_ORDERCREATED']._serialized_start=42
   _globals['_ORDERCREATED']._serialized_end=108
   _globals['_TRADEEXECUTED']._serialized_start=111
-  _globals['_TRADEEXECUTED']._serialized_end=281
+  _globals['_TRADEEXECUTED']._serialized_end=381
   _globals['_TRADEEXECUTED_FILL']._serialized_start=225
   _globals['_TRADEEXECUTED_FILL']._serialized_end=281
+  _globals['_TRADEEXECUTED_COUNTERPARTY']._serialized_start=283
+  _globals['_TRADEEXECUTED_COUNTERPARTY']._serialized_end=381
 # @@protoc_insertion_point(module_scope)

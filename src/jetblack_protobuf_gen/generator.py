@@ -2,6 +2,8 @@ from textwrap import indent
 
 from google.protobuf.descriptor_pb2 import (
     DescriptorProto,
+    EnumDescriptorProto,
+    EnumValueDescriptorProto,
     FileDescriptorProto,
     FieldDescriptorProto
 )
@@ -120,6 +122,7 @@ class {descriptor.name}(
     metaclass=MessageMeta,
     message_type={module}
 ):
+{generate_enums(qualname, module, descriptor.enum_type, 4)}
 {generate_classes(qualname, module, descriptor.nested_type, 4)}
 {generate_instance_types(descriptor.field, 4)}
 
@@ -162,7 +165,49 @@ def generate_classes(
         for descriptor in message_types
     )
     return text
-    # return indent(text, " " * level)
+
+
+def generate_enum_values(
+        values: RepeatedCompositeFieldContainer[EnumValueDescriptorProto],
+        level: int
+) -> str:
+    text = "\n".join(
+        f"{value.name} = {value.number}"
+        for value in values
+    )
+    return indent(text, " " * level)
+
+
+def generate_enum(
+        qualname: str,
+        module: str,
+        enum_descriptor: EnumDescriptorProto,
+        level: int
+) -> str:
+    enum_descriptor.value
+    module = f"{module}.{enum_descriptor.name}"
+    qualname = f"{qualname}.{enum_descriptor.name}"
+    text = f"""\
+class {enum_descriptor.name}(IntEnum):
+{generate_enum_values(enum_descriptor.value, 4)}"""
+
+    return indent(text, " " * level) + "\n"
+
+
+def generate_enums(
+        qualname: str,
+        module: str,
+        enum_types: RepeatedCompositeFieldContainer[EnumDescriptorProto],
+        level: int
+) -> str:
+    if len(enum_types) == 0:
+        return ""
+
+    text = "\n".join(
+        generate_enum(qualname, module, descriptor, level)
+        for descriptor in enum_types
+    )
+    return text
 
 
 def generate_file(
@@ -171,12 +216,16 @@ def generate_file(
     module = f"{file_descriptor.name[:-len(".proto")]}_pb2"
     qualname = f"{file_descriptor.package}"
 
+    file_descriptor.enum_type
+
     return f"""\
+from enum import IntEnum
 from typing import Mapping, TypedDict, Unpack, overload
 
 from {file_descriptor.package} import {module}
 
 from jetblack_protobuf_gen.serializable import Serializable, MessageMeta
 
+{generate_enums(qualname, module, file_descriptor.enum_type, 0)}
 
 {generate_classes(qualname, module, file_descriptor.message_type, 0)}"""

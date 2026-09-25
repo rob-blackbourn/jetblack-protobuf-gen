@@ -1,8 +1,14 @@
+from enum import IntEnum
 from typing import Mapping, TypedDict, Unpack, overload
 
 from jetblack_protobuf_gen.pb import events_pb2
 
 from jetblack_protobuf_gen.serializable import Serializable, MessageMeta
+
+class Side(IntEnum):
+    SIDE_UNSPECIFIED = 0
+    SIDE_BUY = 1
+    SIDE_SELL = 2
 
 
 class OrderCreated(
@@ -10,6 +16,7 @@ class OrderCreated(
     metaclass=MessageMeta,
     message_type=events_pb2.OrderCreated
 ):
+
 
     order_id: str
     symbol: str
@@ -45,11 +52,17 @@ class TradeExecuted(
     metaclass=MessageMeta,
     message_type=events_pb2.TradeExecuted
 ):
+    class Counterparty(IntEnum):
+        COUNTERPARTY_UNSPECIFIED = 0
+        COUNTERPARTY_INTERNAL = 1
+        COUNTERPARTY_EXTERNAL = 2
+
     class Fill(
         Serializable[events_pb2.TradeExecuted.Fill],
         metaclass=MessageMeta,
         message_type=events_pb2.TradeExecuted.Fill
     ):
+
 
         fill_id: str
         quantity: int
