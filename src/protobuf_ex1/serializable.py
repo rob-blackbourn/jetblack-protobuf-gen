@@ -28,6 +28,7 @@ class MessageMeta[T: type](type):
 
 
 class Serializable[MessageType: Message]:
+    __slots__ = ('_instance', '_lists', '_messages', '_is_finalized')
 
     MESSAGE_TYPE: type[MessageType]
     MESSAGE_FIELDS: dict[str, descriptor.FieldDescriptor]
@@ -57,6 +58,9 @@ class Serializable[MessageType: Message]:
                 tuple[MessageType, Mapping[str, type[Serializable]]],
                 args
             )
+
+            self._is_finalized = True
+
             for field in self._instance.DESCRIPTOR.fields:
 
                 value = getattr(self._instance, field.name)
@@ -81,6 +85,7 @@ class Serializable[MessageType: Message]:
                         self._lists[field.name] = list(value)
         else:
             self._instance = self.MESSAGE_TYPE()
+            self._is_finalized = False
             for field in self._instance.DESCRIPTOR.fields:
                 value = kwargs.get(field.name)
                 if value is None:
@@ -109,7 +114,10 @@ class Serializable[MessageType: Message]:
     def __setattr__(self, name: str, value: Any) -> None:
         if not name in self.MESSAGE_FIELDS:
             return super().__setattr__(name, value)
-        elif name in self._lists:
+
+        self._is_finalized = False
+
+        if name in self._lists:
             self._lists[name] = value
         elif name in self._messages:
             self._messages[name] = value
@@ -122,6 +130,9 @@ class Serializable[MessageType: Message]:
         return self.finalize() == other.finalize()
 
     def finalize(self) -> MessageType:
+        if self._is_finalized:
+            return self._instance
+
         for field in self._instance.DESCRIPTOR.fields:
             if field.type == field.TYPE_MESSAGE:
                 value = getattr(self._instance, field.name)
@@ -145,6 +156,8 @@ class Serializable[MessageType: Message]:
                 )
                 for item in self._lists[field.name]:
                     repeated_values.append(item)
+
+        self._is_finalized = True
 
         return self._instance
 
