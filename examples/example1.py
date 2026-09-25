@@ -23,6 +23,33 @@ def produce_order() -> bytes:
 
     return envelope.SerializeToString()
 
+def produce_trade() -> bytes:
+    trade_executed = TradeExecuted(
+        trade_id="1234",
+        order_id="ord-001"
+    )
+
+    fill = trade_executed.fills.add()
+    fill.fill_id = "fill-001"
+    fill.quantity = 100
+    fill.price = 23.4
+
+    fill = trade_executed.fills.add()
+    fill.fill_id = "fill-002"
+    fill.quantity = 150
+    fill.price = 24.3
+
+    payload = Any()
+    payload.Pack(trade_executed)
+
+    envelope = EventEnvelope(
+        event_id="EVT-001",
+        source="order-service",
+        payload=payload
+    )
+
+    return envelope.SerializeToString()
+
 def consume_order(buf: bytes) -> None:
     envelope = cast(EventEnvelope, EventEnvelope.FromString(buf))
 
@@ -43,6 +70,9 @@ def consume_order(buf: bytes) -> None:
 
 def main() -> None:
     buf = produce_order()
+    consume_order(buf)
+
+    buf = produce_trade()
     consume_order(buf)
 
 
