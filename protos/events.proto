@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package tutorial;
+
+message OrderCreated {
+    string order_id = 1;
+    string symbol = 2;
+    int32 quantity = 3;
+}
+
+message TradeExecuted {
+    string trade_id = 1;
+    string order_id = 2;
+
+    message Fill {
+        string fill_id = 1;
+        int32 quantity = 2;
+        double price = 3;
+    }
+
+    repeated Fill fills = 4;
+}

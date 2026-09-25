@@ -1,0 +1,17 @@
+[project]
+name = "protobuf-ex1"
+version = "0.1.0"
+description = "Let's go psycho!"
+authors = [{name = "Rob Blackbourn", email = "rob.blackbourn@gmail.com"}]
+readme = "README.md"
+dependencies = [
+    "protobuf",
+]
+
+[project.optional-dependencies]
+types-protobuf = [
+    "mypy",
+]
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
