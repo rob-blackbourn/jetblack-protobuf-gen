@@ -5,6 +5,7 @@ from google.protobuf.any_pb2 import Any
 from protobuf_ex1.pb.envelope_pb2 import EventEnvelope
 from protobuf_ex1.pb.events_pb2 import OrderCreated, TradeExecuted
 
+
 def produce_order() -> bytes:
     order_created = OrderCreated(
         order_id="ORD-123",
@@ -22,6 +23,7 @@ def produce_order() -> bytes:
     )
 
     return envelope.SerializeToString()
+
 
 def produce_trade() -> bytes:
     trade_executed = TradeExecuted(
@@ -50,6 +52,7 @@ def produce_trade() -> bytes:
 
     return envelope.SerializeToString()
 
+
 def consume_order(buf: bytes) -> None:
     envelope = cast(EventEnvelope, EventEnvelope.FromString(buf))
 
@@ -68,6 +71,7 @@ def consume_order(buf: bytes) -> None:
     else:
         raise ValueError("Unknown payload")
 
+
 def main() -> None:
     buf = produce_order()
     consume_order(buf)
@@ -78,4 +82,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

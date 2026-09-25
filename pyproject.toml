@@ -9,8 +9,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-types-protobuf = [
+dev = [
     "mypy",
+    "types-protobuf",
 ]
 [build-system]
 requires = ["setuptools>=61.0"]
