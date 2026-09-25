@@ -2,8 +2,8 @@ from typing import cast
 
 from google.protobuf.any_pb2 import Any
 
-from protobuf_ex1.pb.envelope_pb2 import EventEnvelope
-from protobuf_ex1.pb.events_pb2 import OrderCreated, TradeExecuted
+from jetblack_protobuf_gen.pb.envelope_pb2 import EventEnvelope
+from jetblack_protobuf_gen.pb.events_pb2 import OrderCreated, TradeExecuted
 
 
 def produce_order() -> bytes:

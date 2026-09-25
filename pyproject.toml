@@ -16,7 +16,7 @@ dev = [
 ]
 
 [project.scripts]
-protoc-gen-jetpy = "protobuf_ex1.plugin:main"
+protoc-gen-jetpy = "jetblack_protobuf_gen.plugin:main"
 
 [build-system]
 requires = ["setuptools>=61.0"]

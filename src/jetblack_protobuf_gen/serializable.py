@@ -6,7 +6,7 @@ from google.protobuf.message import Message
 from google.protobuf.any import type_name
 from google.protobuf import any_pb2
 
-from protobuf_ex1.pb import events_pb2
+from jetblack_protobuf_gen.pb import events_pb2
 
 
 class MessageMeta[T: type](type):
