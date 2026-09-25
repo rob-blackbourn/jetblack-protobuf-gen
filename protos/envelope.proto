@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package protobuf_ex1.pb;
+package jetblack_protobuf_gen.pb;
 
 import "google/protobuf/any.proto";
 

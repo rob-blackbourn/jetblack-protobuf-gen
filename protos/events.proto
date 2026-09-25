@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package tutorial;
+package jetblack_protobuf_gen.pb;
 
 message OrderCreated {
     string order_id = 1;

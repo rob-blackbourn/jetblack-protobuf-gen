@@ -5,16 +5,20 @@ from .pb import events_pb2
 from .serializable import Serializable, MessageMeta
 
 
-class OrderCreated(Serializable, metaclass=MessageMeta, message_type=events_pb2.OrderCreated):
+class OrderCreated(
+    Serializable[events_pb2.OrderCreated],
+    metaclass=MessageMeta,
+    message_type=events_pb2.OrderCreated
+):
+
+    order_id: str
+    symbol: str
+    quantity: int
 
     class Kwargs(TypedDict):
         order_id: str
         symbol: str
         quantity: int
-
-    order_id: str
-    symbol: str
-    quantity: int
 
     @overload
     def __init__(
