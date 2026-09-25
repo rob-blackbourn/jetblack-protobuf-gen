@@ -6,7 +6,6 @@ from google.protobuf.descriptor_pb2 import (
     FieldDescriptorProto
 )
 from google.protobuf.internal.containers import RepeatedCompositeFieldContainer
-from google.protobuf.message import Message
 
 
 def to_ultimate_python_type(field: FieldDescriptorProto) -> str:
@@ -17,7 +16,12 @@ def to_ultimate_python_type(field: FieldDescriptorProto) -> str:
             return "bytes"
         case field.TYPE_FLOAT | field.TYPE_DOUBLE:
             return "float"
-        case field.TYPE_FIXED32 | field.TYPE_FIXED64 | field.TYPE_INT32 | field.TYPE_INT64 | field.TYPE_SFIXED32 | field.TYPE_SFIXED64 | field.TYPE_UINT32 | field.TYPE_UINT64:
+        case (
+            field.TYPE_FIXED32 | field.TYPE_FIXED64 |
+            field.TYPE_INT32 | field.TYPE_INT64 |
+            field.TYPE_SFIXED32 | field.TYPE_SFIXED64 |
+            field.TYPE_UINT32 | field.TYPE_UINT64
+        ):
             return 'int'
         case field.TYPE_STRING:
             return 'str'
