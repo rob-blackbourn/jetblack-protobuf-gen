@@ -10,30 +10,42 @@ except ImportError:
 from google.protobuf.compiler import plugin_pb2
 from google.protobuf import descriptor_pb2
 
-from .generator import generate_file
+from .generator import generate_file, generate_dunder_init
 
 LOGGER = logging.getLogger(__name__)
 
 
 def process_proto_file(
+        module_name: str,
         file_descriptor: descriptor_pb2.FileDescriptorProto,
         response: plugin_pb2.CodeGeneratorResponse,
-) -> None:
+) -> tuple[list[str], list[str]]:
     LOGGER.info("Processing file: %s", file_descriptor.name)
 
     file = response.file.add()
-    file.name = file_descriptor.name[:-len(".proto")] + ".py"
+    file.name = module_name + ".py"
     LOGGER.info("Creating new file: %s", file.name)
 
-    file.content = generate_file(file_descriptor)
+    file.content, classes, enums = generate_file(file_descriptor)
+
+    return classes, enums
 
 
 def process(
         request: plugin_pb2.CodeGeneratorRequest,
         response: plugin_pb2.CodeGeneratorResponse
 ) -> None:
-    for proto_file in request.source_file_descriptors:
-        process_proto_file(proto_file, response)
+    exports_by_module: dict[str, list[str]] = {}
+    for file_descriptor in request.source_file_descriptors:
+        module_name = file_descriptor.name[:-len(".proto")]
+        classes, enums = process_proto_file(
+            module_name, file_descriptor, response)
+        exports_by_module[module_name] = classes + enums
+
+    file = response.file.add()
+    file.name = "__init__.py"
+    LOGGER.info("Creating new file: %s", file.name)
+    file.content = generate_dunder_init(exports_by_module)
 
 
 def main() -> None:

@@ -114,7 +114,9 @@ def generate_class(
         qualname: str,
         module: str,
         descriptor: DescriptorProto,
-        level: int
+        level: int,
+        classes: list[str] | None,
+        enums: list[str] | None
 ) -> str:
     module = f"{module}.{descriptor.name}"
     qualname = f"{qualname}.{descriptor.name}"
@@ -124,8 +126,8 @@ class {descriptor.name}(
     metaclass=MessageMeta,
     message_type={module}
 ):
-{generate_enums(qualname, module, descriptor.enum_type, 4)}
-{generate_classes(qualname, module, descriptor.nested_type, 4)}
+{generate_enums(qualname, module, descriptor.enum_type, 4, enums)}
+{generate_classes(qualname, module, descriptor.nested_type, 4, classes, enums)}
 {generate_instance_types(descriptor.field, 4)}
 
 {generate_kwargs(descriptor.field, 4)}
@@ -150,6 +152,9 @@ class {descriptor.name}(
 
 {generate_from_binary(qualname, module, descriptor, level)}"""
 
+    if classes is not None:
+        classes.append(descriptor.name)
+
     return indent(text, " " * level)
 
 
@@ -157,13 +162,18 @@ def generate_classes(
         qualname: str,
         module: str,
         message_types: RepeatedCompositeFieldContainer[DescriptorProto],
-        level: int
+        level: int,
+        classes: list[str] | None,
+        enums: list[str] | None
 ) -> str:
     if len(message_types) == 0:
         return ""
 
+    if level > 0:
+        classes = None
+
     text = "\n".join(
-        generate_class(qualname, module, descriptor, level)
+        generate_class(qualname, module, descriptor, level, classes, enums)
         for descriptor in message_types
     )
     return text
@@ -184,14 +194,17 @@ def generate_enum(
         qualname: str,
         module: str,
         enum_descriptor: EnumDescriptorProto,
-        level: int
+        level: int,
+        enums: list[str] | None
 ) -> str:
-    enum_descriptor.value
     module = f"{module}.{enum_descriptor.name}"
     qualname = f"{qualname}.{enum_descriptor.name}"
     text = f"""\
 class {enum_descriptor.name}(IntEnum):
 {generate_enum_values(enum_descriptor.value, 4)}"""
+
+    if enums is not None:
+        enums.append(enum_descriptor.name)
 
     return indent(text, " " * level) + "\n"
 
@@ -200,13 +213,14 @@ def generate_enums(
         qualname: str,
         module: str,
         enum_types: RepeatedCompositeFieldContainer[EnumDescriptorProto],
-        level: int
+        level: int,
+        enums: list[str] | None
 ) -> str:
     if len(enum_types) == 0:
         return ""
 
     text = "\n".join(
-        generate_enum(qualname, module, descriptor, level)
+        generate_enum(qualname, module, descriptor, level, enums)
         for descriptor in enum_types
     )
     return text
@@ -214,13 +228,16 @@ def generate_enums(
 
 def generate_file(
         file_descriptor: FileDescriptorProto
-) -> str:
+) -> tuple[str, list[str], list[str]]:
+    classes: list[str] = []
+    enums: list[str] = []
+
     module = f"{file_descriptor.name[:-len(".proto")]}_pb2"
     qualname = f"{file_descriptor.package}"
 
     file_descriptor.enum_type
 
-    return f"""\
+    contents = f"""\
 from enum import IntEnum
 from typing import Mapping, TypedDict, Unpack, overload
 
@@ -228,6 +245,30 @@ from {file_descriptor.package} import {module}
 
 from jetblack_protobuf_gen.serializable import Serializable, MessageMeta
 
-{generate_enums(qualname, module, file_descriptor.enum_type, 0)}
+{generate_enums(qualname, module, file_descriptor.enum_type, 0, enums)}
 
-{generate_classes(qualname, module, file_descriptor.message_type, 0)}"""
+{generate_classes(qualname, module, file_descriptor.message_type, 0, classes, None)}"""
+
+    return contents, classes, enums
+
+
+def generate_dunder_init(
+        exports_by_module: dict[str, list[str]],
+) -> str:
+    imports = "\n".join([
+        f"from .{module_name} import {','.join(names)}"
+        for module_name, names in exports_by_module.items()
+    ])
+    dunder_all = ",\n".join([
+        f'    "{name}"'
+        for names in exports_by_module.values()
+        for name in names
+    ])
+
+    return f"""\
+{imports}
+
+__all__ = [
+{dunder_all}
+]
+"""
