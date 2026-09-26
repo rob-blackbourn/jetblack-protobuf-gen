@@ -29,6 +29,8 @@ def to_ultimate_python_type(field: FieldDescriptorProto) -> str:
             return 'str'
         case field.TYPE_MESSAGE:
             return 'Serializable'
+        case field.TYPE_ENUM:
+            return field.type_name.rpartition(".")[2]
         case _:
             raise ValueError(f"Unable to handle: {field.type}")
 
